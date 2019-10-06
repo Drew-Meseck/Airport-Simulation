@@ -4,8 +4,19 @@ using System.Text;
 
 namespace Airport_Simulation
 {
+
+    /// <summary>
+    /// Drew H. Meseck
+    /// Professor Owrang
+    /// Algorithms and Data Structures
+    /// 
+    /// This portion of the program definies what constitutes an instance of an airport, manages its direct functions
+    /// and actually simulates its operations. It is also responsible for the generation of airplanes, and the 
+    /// maintainance of the clock and all statistics.
+    /// </summary>
     class Airport
     {
+        //DEFINE ALL ATTRIBUTES
         Queue<Airplane> takeoff;
         Queue<Airplane> landing;
         List<Airplane> processed; 
@@ -26,9 +37,9 @@ namespace Airport_Simulation
         int clock;
         int id_counter_arr;
         int id_counter_dep;
-
+        //END DEFINE ATTRIBUTES
         public Airport(double takeoff_propensity, double arrival_propensity,
-            Queue<Airplane> to, Queue<Airplane> ld, int minutes_to_complete)
+            Queue<Airplane> to, Queue<Airplane> ld, int minutes_to_complete)//Creates an Airport instance
         {
             this.takeoff = to;
             this.landing = ld;
@@ -43,12 +54,12 @@ namespace Airport_Simulation
             this.num_to = 0;
         }
 
-        public void IncrementTime()
+        public void IncrementTime()//Increments the clock
         {
             this.clock++;
         }
 
-        public string GetTime()
+        public string GetTime()//Returns the time from the clock as a string (more readable to people) starting at noon.
         {
             int min_elapsed = this.clock * 5;
             int hour_counter = min_elapsed / 60;
@@ -63,7 +74,7 @@ namespace Airport_Simulation
 
         }
 
-        public List<Airplane> GenerateTO(double priority)//Generates Takeoffs based on propensity to depart
+        public List<Airplane> GenerateTO(double priority)//Generates Takeoffs
         {
             Random rand = new Random();
             List<Airplane> results = new List<Airplane>();
@@ -79,7 +90,7 @@ namespace Airport_Simulation
             return results;
         }
 
-        public List<Airplane> GenerateArr(double priority)//Generates Arrivals based propensity to arrive
+        public List<Airplane> GenerateArr(double priority)//Generates Arrivals
         {
             Random rand = new Random();
             List<Airplane> results = new List<Airplane>();
@@ -95,7 +106,7 @@ namespace Airport_Simulation
             return results;
         }
 
-        public void UpdatePlanes()
+        public void UpdatePlanes()//Increments the wait time for planes in queues and prints updates as to the queue sizes
         {
             foreach(Airplane plane in this.takeoff)
                 plane.Update();
@@ -107,7 +118,7 @@ namespace Airport_Simulation
 
         }
 
-        public void Aggregate(Queue<Airplane> takeoff, Queue<Airplane> landing, List<Airplane> processed)
+        public void Aggregate(Queue<Airplane> takeoff, Queue<Airplane> landing, List<Airplane> processed) //Aggregates and averages relevant statistics
         {
             int to_wait_sum = 0;
             int a_wait_sum = 0;
@@ -161,7 +172,7 @@ namespace Airport_Simulation
 
         public void PrintStatistics(Queue<Airplane> takeoff, Queue<Airplane> landing,
             double average_takeoff_wait, double average_landing_wait, int total_takeoffs_processed,
-            int total_landings_processed)
+            int total_landings_processed)//Print formatting for the aggregated statistics (Prints the final output of the simulation)
         {
             Console.WriteLine();
             Console.WriteLine("-------------------FINAL STATISTICS-------------------");
@@ -191,31 +202,35 @@ namespace Airport_Simulation
 
         }
 
-        public void Simulate()
+        public void Simulate() //Actually simulates the generation of planes and allocation of runways based on a clock cycle.
         {
             int ratio_flag = 0;// 0 means more planes are arriving than departing (default priority)
             if (ap < top)
                 ratio_flag = 1;// 1 means more planes are departing than arriving (deviant priority)
 
-            while (this.clock < this.min_t_c)
+            while (this.clock < this.min_t_c)//While the clock is less than the given time to complete do:
             {
+                //Generate new lists of arrivals and departures
                 List<Airplane> arrivals = GenerateArr(this.ap);
                 List<Airplane> departures = GenerateTO(this.top);
+
+                //Add the new planes to the queues
                 foreach (Airplane plane in arrivals)
                     this.landing.Enqueue(plane);
                 foreach (Airplane plane in departures)
                     this.takeoff.Enqueue(plane);
 
+                //Initial Printing for each Clocked print
                 Console.WriteLine();
                 Console.WriteLine($"The time is: {this.GetTime()}");
                 Console.WriteLine($"There are {this.takeoff.Count} planes waiting to depart");
                 Console.WriteLine($"There are {this.landing.Count} planes waiting to land");
 
 
-                //Assign runway0 a plane if there is a plane to assign it.
+                //Assign runway0 
                 if(this.runway0 == true && (this.landing.Count != 0 || this.takeoff.Count !=0))
                 {
-                    if(this.landing.Count == 0)
+                    if(this.landing.Count == 0)//if landing is empty assign a takeoff
                     {
                         Airplane temp = this.takeoff.Dequeue();
                         Console.WriteLine($"Plane {temp.GetIDString()} is cleared for Takeoff");
@@ -223,7 +238,7 @@ namespace Airport_Simulation
                         this.num_to++;
                         this.runway0 = false;
                     }
-                    else if(takeoff.Count == 0 && this.runway0 != false)
+                    else if(takeoff.Count == 0 && this.runway0 != false)//if takeoff is empty assign a landing
                     {
                         Airplane temp = this.landing.Dequeue();
                         Console.WriteLine($"Plane {temp.GetIDString()} is cleared for Landing");
@@ -231,7 +246,7 @@ namespace Airport_Simulation
                         this.num_ld++;
                         this.runway0 = false;
                     }
-                    else if(ratio_flag == 0 && this.runway0 != false)//more landing than departing
+                    else if(ratio_flag == 0 && this.runway0 != false)//more landing than departing (priority assignment)
                     {
                         Airplane temp = this.landing.Dequeue();
                         Console.WriteLine($"Plane {temp.GetIDString()} is cleared for Landing");
@@ -248,10 +263,10 @@ namespace Airport_Simulation
                         this.runway0 = false;
                     }
                 }
-
+                //Assign runway1 
                 if (this.runway1 == true && (this.landing.Count != 0 || this.takeoff.Count != 0))
                 {
-                    if (this.landing.Count == 0)
+                    if (this.landing.Count == 0)//if landing is empty assign a takeoff
                     {
                         Airplane temp = this.takeoff.Dequeue();
                         Console.WriteLine($"Plane {temp.GetIDString()} is cleared for Takeoff");
@@ -259,7 +274,7 @@ namespace Airport_Simulation
                         this.num_to++;
                         this.runway1 = false;
                     }
-                    else if (takeoff.Count == 0 && this.runway0 != false)
+                    else if (takeoff.Count == 0 && this.runway0 != false)//if takeoff is empty assign a landing
                     {
                         Airplane temp = this.landing.Dequeue();
                         Console.WriteLine($"Plane {temp.GetIDString()} is cleared for Landing");
@@ -267,7 +282,7 @@ namespace Airport_Simulation
                         this.num_ld++;
                         this.runway1 = false;
                     }
-                    else if(this.runway1 != false && (this.landing.Count != 0 || this.takeoff.Count != 0))
+                    else if(this.runway1 != false && (this.landing.Count != 0 || this.takeoff.Count != 0))//pseudo random assignment (mostly takeoffs though)
                     {
                         Random rand = new Random();
                         double r = rand.NextDouble();
@@ -290,14 +305,14 @@ namespace Airport_Simulation
                     }
                 }
 
-                
+                //End of clock updates
                 this.UpdatePlanes();
                 Console.WriteLine();
                 this.IncrementTime();
                 this.runway0 = true;
                 this.runway1 = true;
             }
-
+            //End of simulation statistical aggregation and printing
             this.Aggregate(this.takeoff, this.landing, this.processed);
             this.PrintStatistics(this.takeoff, this.landing, this.ato_wait, this.aa_wait,
                 this.num_to, this.num_ld);
