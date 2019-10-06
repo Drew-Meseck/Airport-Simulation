@@ -6,9 +6,9 @@ namespace Airport_Simulation
 {
     class Airplane
     {
-        int id { get; set; }
-        int wait_time { get; set; }
-        int status { get; set;}
+        public int id { get; set; }
+        public int wait_time { get; set; }
+        public int status { get; set;}
 
 
         public Airplane(int identification, int s)
@@ -24,7 +24,7 @@ namespace Airport_Simulation
             this.wait_time++;
         }
 
-        public string getIDString()
+        public string GetIDString()
         {
             string res = "#" + Convert.ToString(this.id);
             return res;
